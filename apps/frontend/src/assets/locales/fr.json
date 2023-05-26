@@ -1,0 +1,14 @@
+{
+  "common" : {
+    "or": "ou",
+    "email_address": "adresse email",
+    "password": "mot de passe",
+    "logout": "déconnexion",
+    "email": "email",
+    "name": "prénom",
+    "hub": "hub"
+  },
+  "error" : {
+    "network" : "Nous ne pouvons pas nous connecter aux serveurs, veuillez contacter votre administrateur."
+  }
+}

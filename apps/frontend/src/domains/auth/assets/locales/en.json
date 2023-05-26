@@ -1,0 +1,16 @@
+{
+  "login": {
+    "title": "Welcome back !",
+    "button_with_google": "Login with Google",
+    "button": "Login",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "register_account": "Register",
+    "error": {
+      "enter_valid_email": "Enter a valid email address",
+      "enter_email": "Enter an email address",
+      "enter_valid_password" : "The password must have a minimum length of 4 characters",
+      "enter_password": "Enter a password"
+    }
+  }
+}

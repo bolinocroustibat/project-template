@@ -1,0 +1,6 @@
+.cache
+build
+node_modules/
+dist/
+tsconfig.tsbuildinfo
+.env.*

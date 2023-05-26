@@ -1,0 +1,52 @@
+steps:
+
+  - id: "Pull the Docker image"
+    name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "gcr.io/${PROJECT_ID}/${_SERVICE_NAME_PREFIX}-${_ENV_NAME}", "."]
+
+  - id: "Push the Docker image to Google Container Registry"
+    name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/${PROJECT_ID}/${_SERVICE_NAME_PREFIX}-${_ENV_NAME}"]
+
+  - id: "Apply migrations to the database"
+    name: "gcr.io/google-appengine/exec-wrapper"
+    args:
+      [
+        "-i",
+        "gcr.io/$PROJECT_ID/${_SERVICE_NAME_PREFIX}-${_ENV_NAME}",
+        "-s",
+        "${PROJECT_ID}:${_REGION}:${_SQL_INSTANCE_NAME_PREFIX}-${_ENV_NAME}",
+        '-e',
+        'ENV_NAME=$_ENV_NAME',
+        "--",
+        "python",
+        "manage.py",
+        "migrate",
+      ]
+
+  - id: "Collect static files"
+    name: "gcr.io/google-appengine/exec-wrapper"
+    args:
+      [
+        "-i",
+        "gcr.io/$PROJECT_ID/${_SERVICE_NAME_PREFIX}-${_ENV_NAME}",
+        "-s",
+        "${PROJECT_ID}:${_REGION}:${_SQL_INSTANCE_NAME_PREFIX}-${_ENV_NAME}",
+        '-e',
+        'ENV_NAME=$_ENV_NAME',
+        "--",
+        "python",
+        "manage.py",
+        "collectstatic",
+        "--verbosity",
+        "2",
+        "--no-input",
+      ]
+
+substitutions:
+  _SQL_INSTANCE_NAME_PREFIX: project-template-db
+  _REGION: europe-west9
+  _SERVICE_NAME_PREFIX: project-template-backend
+
+images:
+  - "gcr.io/${PROJECT_ID}/${_SERVICE_NAME_PREFIX}-${_ENV_NAME}"
