@@ -130,14 +130,14 @@ $~$
 
 - remove ALL containers, images, caches, networks from docker
 
-```shell
+```bash
 docker system prune -a
 ```
 
 - run the server on docker
   _On Windows, if you want a sync host/vm, you have to work in \\\wsl$\docker-desktop-data\data\docker\volumes\...\_data_
 
-```shell
+```bash
 yarn dev
 # or docker-compose up
 # add --build to rebuild the container
@@ -145,6 +145,6 @@ yarn dev
 
 - run test on docker
 
-```shell
+```bash
 docker-compose run -i -t --rm --entrypoint=sh web -c "yarn test"
 ```

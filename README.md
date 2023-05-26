@@ -5,7 +5,7 @@ There is everything you need to start a project from scratch quickly (api, web, 
 
 $~$
 ## 0) Basics
-- `PROJECT_ID` => pokemon-apps
+- `PROJECT_ID`: for example "pokemon-apps"
   - It is immutable and can be set only during project creation.
   - It must start with a lowercase letter and can have lowercase ASCII letters, digits or hyphens.
   - It must be between 6 and 30 characters.
@@ -13,20 +13,20 @@ $~$
 $~$
 ## 1) Set up the codebase
 - Clone and set the remote url
-`PROJECT_ID` = look 0) Basics
-```shell
+`PROJECT_ID` = see 0) Basics
+```bash
 git clone git@github.com:adriencarpentier.com/project-template.git $PROJECT_ID
 && git remote set-url origin git@github.com:adriencarpentier.com/$PROJECT_ID.git
 && git checkout -B dev
 ```
 
 - Configure git (on Windows only)
-```shell
+```bash
 git config --global core.autocrlf false
 ```
 
 - Populate the pre-commit script
-```shell
+```bash
 cp ./scripts/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 ```
 
@@ -41,7 +41,7 @@ $~$
 ## 3) Set up the dev/prod environment
 #### A) Open the [GCP console](https://shell.cloud.google.com/?hl=en_US&fromcloudshell=true&show=terminal)
 - Set variable in the terminal : `> MY_VARIABLE=MY_VALUE`
-  - `PROJECT_ID` = look 0) Basics
+  - `PROJECT_ID` = see 0) Basics
   - `REPOSITORY` = my-org/my-repo => adriencarpentier.com/project-template
   - `BILLING_ACCOUNT_ID` = search the billing **ACCOUNT_ID** ```gcloud beta billing accounts list --filter="OPEN:true"```
   - `SQL_INSTANCE_NAME` = PROJECT_ID-staging OR PROJECT_ID-production
@@ -53,7 +53,7 @@ $~$
 **FROM NOW, YOU JUST HAVE TO COPY/PASTE SHELL COMMAND**
 
 #### B) Create GCP project
-```shell
+```bash
 echo "-------------Create GCP project-------------"
 
 && echo "Set up GCP project"
@@ -68,7 +68,7 @@ echo "-------------Create GCP project-------------"
 ```
 
 #### C) Create CI/CD IAMs - [Roles](https://cloud.google.com/iam/docs/understanding-roles) [Workload Identity](https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions)
-```shell
+```bash
 echo "-------------Create CI/CD IAMs-------------"
 
 && echo "Get the project number"
@@ -91,7 +91,7 @@ echo "-------------Create CI/CD IAMs-------------"
 ```
 
 #### D) Create postgresSQL database [Cloud SQL](https://cloud.google.com/sql/docs/postgres/create-instance)
-```shell
+```bash
 echo "-------------Create postgresSQL database-------------"
 
 && echo "Create the instance"
@@ -107,12 +107,12 @@ _(optional for prod) You can repeat this part for the production database by cha
 
 #### E) (optional) Add a developer on the project
 `DEVELOPER_EMAIL` = my-user@my-domain.com
-```shell
+```bash
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=user:$DEVELOPER_EMAIL --role=roles/editor
 ```
 
 #### F) (optional) Delete the project
-```shell
+```bash
 gcloud projects delete $PROJECT_ID
 ```
 
@@ -138,10 +138,10 @@ $~$
 
 $~$
 ## 5) Push the first commit
-```shell
+```bash
 git add -A && git commit -m "build: first commit" && git push origin main
 ```
-The dev URL : Actions > Look the API/FRONTEND jobs > Deploy to Google Cloud Run > Service URL
+The dev URL : Actions > see the API/FRONTEND jobs > Deploy to Google Cloud Run > Service URL
 Don't forget to update the environment "frontend-staging" with the api URL
 
 
