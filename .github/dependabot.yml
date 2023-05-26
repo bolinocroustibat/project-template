@@ -3,14 +3,14 @@
 version: 2
 updates:
 
-  # Maintain dependencies for GitHub Actions
+  # Maintain dependencies for frontend
   - package-ecosystem: "npm"
     directory: "/apps/frontend"
     schedule:
       interval: "monthly"
 
-  # Maintain dependencies for poetry
-  - package-ecosystem: "poetry"
+  # Maintain dependencies for backend
+  - package-ecosystem: "pip"
     directory: "/apps/backend"
     schedule:
       interval: "monthly"
