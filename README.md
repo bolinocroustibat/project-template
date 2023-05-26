@@ -5,9 +5,7 @@ There is everything you need to start a project from scratch quickly (api, web, 
 
 $~$
 ## 0) Basics
-- `PROJECT_CODE` = the 4 letters code of the project on airtable
-
-- `PROJECT_ID` = `PROJECT_CODE`-apps => TEST-apps
+- `PROJECT_ID` => pokemon-apps
   - It is immutable and can be set only during project creation.
   - It must start with a lowercase letter and can have lowercase ASCII letters, digits or hyphens.
   - It must be between 6 and 30 characters.
