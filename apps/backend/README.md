@@ -90,7 +90,7 @@ For example:
 pdm run ./manage.py runserver
 ```
 
-### To create new migrations
+### To create new migrations (will be created in `pokemons_app/migrations`)
 ```bash
 pdm run ./manage.py makemigrations
 ```
@@ -112,9 +112,9 @@ pdm run ./manage.py createsuperuser
 pdm run ./manage.py runserver
 ```
 
-### To export requirements to old `requirements.txt` file
+### To export lock requirements to old `requirements.txt` lock file
 ```bash
-pdm export -o requirements
+pdm export -o requirements.txt --production
 ```
 
 ## To connect to remote GCP SQL
@@ -123,7 +123,7 @@ You will need a proxy to connect to the GCP PostgreSQL database. More info: [htt
 Before connecting to the database, launch the proxy with:
 - dev:
 ```bash
-./cloud-sql-proxy project-template-backend:europe-west9:project-template-db-dev
+./cloud-sql-proxy project-template-backend:europe-west9:project-template-db-staging
 ```
 - prod:
 ```bash
@@ -139,7 +139,7 @@ Once connected through GCP SQL proxy, you can connect to the DB using the follow
 ## To test the CloudSQL instance
 
 ```bash
-gcloud sql instances describe project-template-db-dev
+gcloud sql instances describe project-template-db-staging
 ```
 
 ## To deploy on GCP Cloud Run
@@ -153,7 +153,7 @@ If not there yet, add secrets to the GCP Secrets Manager. Using the "permission"
 Build the image with:
 - dev:
 ```bash
-gcloud builds submit --config cloudbuild.yaml --substitutions _ENV_NAME=dev
+gcloud builds submit --config cloudbuild.yaml --substitutions _ENV_NAME=staging
 ```
 - prod:
 ```bash
@@ -163,12 +163,12 @@ gcloud builds submit --config cloudbuild.yaml --substitutions _ENV_NAME=prod
 Deploy it with:
 - dev:
 ```bash
-gcloud run deploy project-template-backend-dev \
+gcloud run deploy project-template-backend-staging \
     --platform managed \
     --region europe-west9 \
-    --image gcr.io/project-template-backend/project-template-backend-dev \
-    --add-cloudsql-instances project-template-backend:europe-west9:project-template-db-dev \
-    --set-env-vars ENV_NAME=dev \
+    --image gcr.io/project-template-backend/project-template-backend-staging \
+    --add-cloudsql-instances project-template-backend:europe-west9:project-template-db-staging \
+    --set-env-vars ENV_NAME=staging \
     --allow-unauthenticated
 ```
 - prod:
@@ -185,7 +185,7 @@ gcloud run deploy project-template-backend-prod \
 Get the API URL with:
 - dev:
 ```bash
-SERVICE_URL=$(gcloud run services describe project-template-backend-dev --platform managed --region europe-west9 --format "value(status.url)")
+SERVICE_URL=$(gcloud run services describe project-template-backend-staging --platform managed --region europe-west9 --format "value(status.url)")
 ```
 - prod:
 ```bash
@@ -195,10 +195,10 @@ SERVICE_URL=$(gcloud run services describe project-template-backend-prod --platf
 Update the deployed build with the API URL:
 - dev:
 ```bash
-gcloud run services update project-template-backend-dev \
+gcloud run services update project-template-backend-staging \
     --platform managed \
     --region europe-west9 \
-    --set-env-vars ENV_NAME=dev,CLOUDRUN_SERVICE_URL=$SERVICE_URL
+    --set-env-vars ENV_NAME=staging,CLOUDRUN_SERVICE_URL=$SERVICE_URL
 ```
 - prod:
 ```bash
@@ -210,10 +210,10 @@ gcloud run services update project-template-backend-prod \
 
 ## To update the deployed instance
 
-- dev:
+- staging:
 ```bash
-gcloud builds submit --config cloudbuild.yaml --substitutions _ENV_NAME=dev
-gcloud run deploy project-template-backend-dev\
+gcloud builds submit --config cloudbuild.yaml --substitutions _ENV_NAME=staging
+gcloud run deploy project-template-backend-staging\
     --platform managed \
     --region europe-west9 \
     --image gcr.io/project-template-backend/project-template-backend-dev

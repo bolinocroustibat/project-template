@@ -15,7 +15,6 @@
 import io
 import logging
 import os
-import sys
 import tomllib
 from pathlib import Path
 from urllib.parse import urlparse
@@ -211,7 +210,7 @@ STATIC_URL = "/static/"
 # [END cloudrun_django_static_config]
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
+# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
@@ -220,23 +219,11 @@ DEFAULT_VIDEOFILEPATH: Path = Path("files/video.mp4")
 DEFAULT_AUDIOFILEPATH: Path = Path("files/audio.mp3")
 
 
-# FFmpeg
-FFMPEG_FILEPATH = "/usr/local/bin/ffmpegg"
-sys.path.append(FFMPEG_FILEPATH)
-
-
 # SuperUser
 DJANGO_SUPERUSER_EMAIL = "me@adriencarpentier.com"
 DJANGO_SUPERUSER_USERNAME = "admin"
 DJANGO_SUPERUSER_PASSWORD = env("DJANGO_SUPERUSER_PASSWORD")
 
-
-# The gpt-3.5-turbo model's maximum context length is 4097 tokens.
-CHATGPT_MODELS = [
-    {"model-name": "gpt-3.5-turbo", "max-tokens": 4097},
-    {"model-name": "gpt-4", "max-tokens": 8000},
-    {"model-name": "gpt-4-32k", "max-tokens": 32760},
-]
 
 # App config
 with open("pyproject.toml", "rb") as f:
@@ -244,6 +231,7 @@ with open("pyproject.toml", "rb") as f:
 APP_NAME: str = pyproject["project"].get("name", "unknown")
 DESCRIPTION: str = pyproject["project"].get("description")
 VERSION: str = pyproject["project"].get("version", "unknown")
+
 
 # Sentry
 SENTRY_DSN = env("SENTRY_DSN", default=None)
