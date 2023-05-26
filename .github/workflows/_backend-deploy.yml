@@ -1,0 +1,81 @@
+on:
+  workflow_call:
+    inputs:
+      ENVIRONMENT:
+        type: string
+        required: true
+      GCP_RUN_CONFIG:
+        type: string
+        required: true
+    secrets:
+      ENV:
+        required: true
+
+defaults:
+  run:
+    working-directory: ./apps/backend
+
+jobs:
+  cloud:
+    name: Deploy on Google Cloud
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Extract environment variables from ENV secret
+        run: |
+          echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "ENV_NAME" >> $GITHUB_ENV
+          echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "PROJECT_ID" >> $GITHUB_ENV
+          echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "PROJECT_NUMBER" >> $GITHUB_ENV
+          echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "SERVICE_NAME" >> $GITHUB_ENV
+          echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "SQL_INSTANCE_NAME" >> $GITHUB_ENV
+          echo "GCP_IMAGE_URL=gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}" >> $GITHUB_ENV
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/ci-cd-github/providers/ci-cd-github
+          service_account: ci-cd-github@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+
+      - name: Set up Docker
+        run: gcloud auth configure-docker -q
+
+      - name: Pull the Docker image
+        run: docker pull ${{ env.GCP_IMAGE_URL }} || true
+
+      - name: Push the Docker image to Google Container Registry
+        run: docker push ${{ env.GCP_IMAGE_URL }}
+
+      - name: Apply migrations to the database inside the Docker container
+        run: docker run --rm ${{ env.GCP_IMAGE_URL }} -e ENV_NAME=$_ENV_NAME python manage.py migrate
+
+      - name: Collect static files inside the Docker container
+        run: docker run --rm ${{ env.GCP_IMAGE_URL }} -e ENV_NAME=$_ENV_NAME python manage.py collectstatic --verbosity 2 --no-input
+
+      # https://cloud.google.com/sdk/gcloud/reference/run/deploy
+      - name: Deploy to Google Cloud Run
+        run: >
+          gcloud run deploy
+          --platform managed
+          --project ${{ env.PROJECT_ID }}
+          --image ${{ env.GCP_IMAGE_URL }}
+          --region ${{ env.GCP_RUN_REGION }}
+          --service ${{ env.SERVICE_NAME }}
+          --allow-unauthenticated
+          --set-cloudsql-instances ${{ env.PROJECT_ID }}:${{ env.GCP_RUN_REGION }}:${{ env.SQL_INSTANCE_NAME }}
+          --set-env-vars ENV_NAME=${{ env.ENV_NAME }}
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1.4.1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ env.PROJECT_ID }}-api
+        with:
+          environment: prod
+          version: ${{ github.ref_name }}

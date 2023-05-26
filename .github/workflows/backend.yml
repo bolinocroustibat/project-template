@@ -1,0 +1,47 @@
+name: Deploy Backend
+
+on:
+  push:
+    tags:
+      - '*'
+    paths:
+      - "apps/backend/**"
+      - ".github/**"
+  release:
+    types: [published]
+    paths:
+      - "apps/backend/**"
+      - ".github/**"
+
+jobs:
+  deploy-staging:
+    name: Deploy Staging
+    if: endsWith(github.ref, '/dev')
+    uses: ./.github/workflows/_api-deploy.yml
+    secrets: inherit
+    with:
+      ENVIRONMENT: "backend-staging"
+      GCP_RUN_CONFIG: "
+      --memory 1Gi
+      --cpu 1
+      --timeout 40
+      --concurrency 80
+      --allow-unauthenticated
+      --platform managed
+      "
+
+  deploy-production:
+    name: Deploy Production
+    if: endsWith(github.ref, '/main')
+    uses: ./.github/workflows/_api-deploy.yml
+    secrets: inherit
+    with:
+      ENVIRONMENT: "api-production"
+      GCP_RUN_CONFIG: "
+      --memory 2Gi
+      --cpu 2
+      --timeout 40
+      --concurrency 80
+      --allow-unauthenticated
+      --platform managed
+      "

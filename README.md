@@ -44,7 +44,7 @@ $~$
   - `PROJECT_ID` = look 0) Basics
   - `REPOSITORY` = my-org/my-repo => adriencarpentier.com/project-template
   - `BILLING_ACCOUNT_ID` = search the billing **ACCOUNT_ID** ```gcloud beta billing accounts list --filter="OPEN:true"```
-  - `SQL_INSTANCE_NAME` = PROJECT_ID-development OR PROJECT_ID-production
+  - `SQL_INSTANCE_NAME` = PROJECT_ID-staging OR PROJECT_ID-production
   - `SQL_TIER` = db-f1-micro OR db-g1-small
   - `SQL_REGION` = [https://cloud.google.com/sql/docs/sqlserver/locations](https://cloud.google.com/sql/docs/sqlserver/locations)
   - `SQL_DATABASE_NAME` = your call :)
@@ -120,43 +120,36 @@ gcloud projects delete $PROJECT_ID
 $~$
 ## 4) Set up GitHub Environments : Settings > Environments > New environment
 - For the backend, create a new environment with the following data :
-1. Name: _api-development_
+1. Name: _backend-staging_
 2. Click on "Add deployment branch rule" and fill with _dev_
 3. Click on "Add secret"
    1. NAME: _ENV_
    2. Value: _content from .env.deploy.template_
-4. _(optional for prod) Repeat one more time, with name _api-production_ and branch _main__
+4. _(optional for prod) Repeat one more time, with name _backend-production_ and branch _main__
 
 - For the frontend, create a new environment with the following data :
-1. Name: _web-development_
+1. Name: _frontend-staging_
 2. Click on "Add deployment branch rule" and fill with _dev_
 3. Click on "Add secret"
     1. NAME: _ENV_
     2. Value: _content from .env.deploy.template_
-4. _(optional for prod) Repeat one more time, with name _web-production_ and branch _main__
+4. _(optional for prod) Repeat one more time, with name _frontend-production_ and branch _main__
 
 
 $~$
-## 5) Push the first commit on dev branch
+## 5) Push the first commit
 ```shell
-git add -A && git commit -m "first commit" && git push origin dev
+git add -A && git commit -m "build: first commit" && git push origin main
 ```
 The dev URL : Actions > Look the API/FRONTEND jobs > Deploy to Google Cloud Run > Service URL
-Don't forget to update the environment "web-development" with the api URL
+Don't forget to update the environment "frontend-staging" with the api URL
 
 
 $~$
-## 6) (optional for prod) Push the first commit on main branch
-```shell
-git add -A && git commit -m "first commit" && git push origin main
-```
-The prod URL : Actions > Look the API/FRONTEND jobs > Deploy to Google Cloud Run > Service URL
-
-## 4) Set up GitHub protection : Settings > Branches > Add rule
-1. Name: _dev_
+## 6) (optional) Set up GitHub protection : Settings > Branches > Add rule
+1. Name: _main_
 2. Protect matching branches :
     1. _Require a pull request before merging_
     2. _Require status checks to pass before merging_
         1. _Require branches to be up-to-date before merging_
     3. _Do not allow bypassing the above settings_
-3. _(optional for prod) Repeat 1. and 2. with name _main__

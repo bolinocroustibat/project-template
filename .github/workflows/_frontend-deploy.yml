@@ -1,0 +1,74 @@
+on:
+  workflow_call:
+    inputs:
+      ENVIRONMENT:
+        type: string
+        required: true
+      GCP_RUN_CONFIG:
+        type: string
+        required: true
+    secrets:
+      ENV:
+        required: true
+
+defaults:
+  run:
+    working-directory: ./apps/frontend
+
+jobs:
+  cloud:
+    name: Google Cloud
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup ENV
+        run: |
+          echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "PROJECT_ID" >> $GITHUB_ENV
+          echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "PROJECT_NUMBER" >> $GITHUB_ENV
+          echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "GCP_RUN_REGION" >> $GITHUB_ENV
+          
+          export $(echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "PROJECT_ID" | envsubst)
+          export $(echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "GCP_IMAGE_REGION" | envsubst)
+          echo "GCP_IMAGE=$GCP_IMAGE_REGION/$PROJECT_ID/${{ inputs.environment }}:latest" >> $GITHUB_ENV
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/ci-cd-github/providers/ci-cd-github
+          service_account: ci-cd-github@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+
+      - name: Set up Docker
+        run: gcloud auth configure-docker -q
+
+      - name: Pull the Docker image
+        run: docker pull ${{ env.GCP_IMAGE }} || true
+
+      - name: Build the Docker image
+        run: >
+          DOCKER_BUILDKIT=1 docker build 
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          --build-arg $(echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "NODE_VERSION")
+          --build-arg $(echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "NODE_ENV")
+          --build-arg PORT=8080
+          --cache-from ${{ env.GCP_IMAGE }}
+          -t ${{ env.GCP_IMAGE }}
+          -f Dockerfile .
+
+      - name: Push the Docker image to Google Container Registry
+        run: docker push ${{ env.GCP_IMAGE }}
+
+      # https://cloud.google.com/sdk/gcloud/reference/run/deploy
+      - name: Deploy to Google Cloud Run
+        run: >
+          gcloud run deploy
+          --project ${{ env.PROJECT_ID }} ${{ inputs.environment }}
+          --image ${{ env.GCP_IMAGE }}
+          --region ${{ env.GCP_RUN_REGION }}
+          ${{ inputs.GCP_RUN_CONFIG }}
+          --set-env-vars $(echo "${{ secrets.ENV }}" | sed '/^#/d' | grep "\S" | tr '\n' ',')

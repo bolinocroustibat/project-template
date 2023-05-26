@@ -1,0 +1,16 @@
+# Basic set up for three package managers
+
+version: 2
+updates:
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "npm"
+    directory: "/apps/frontend"
+    schedule:
+      interval: "monthly"
+
+  # Maintain dependencies for poetry
+  - package-ecosystem: "poetry"
+    directory: "/apps/backend"
+    schedule:
+      interval: "monthly"

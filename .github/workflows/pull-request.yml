@@ -1,0 +1,25 @@
+name: Pull request
+
+on: [pull_request]
+
+jobs:
+  semantic-checking:
+    name: Semantic checking
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/commitizen/conventional-commit-types/blob/master/index.json
+      #
+      # FORMAT : <type>(<scope>): <summary>
+      #
+      # <type>: build|ci|docs|feat|fix|perf|refactor|test
+      #
+      # <scope>: animations|bazel|benchpress|common|compiler|compiler-cli|core|
+      #          elements|forms|http|language-service|localize|platform-browser|
+      #          platform-browser-dynamic|platform-server|router|service-worker|
+      #          upgrade|zone.js|packaging|changelog|docs-infra|migrations|ngcc|ve|
+      #          devtools
+      #
+      # <summary>: Summary in present tense. Not capitalized. No period at the end.
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
