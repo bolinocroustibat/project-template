@@ -1,7 +1,7 @@
 [project]
 name = "project-template"
 version = "0.1.0"
-description = "Project Template - Python API + React frontend"
+description = "Project Template - Python API"
 authors = [
     {name = "Adrien Carpentier", email = "me@adriencarpentier.com"},
 ]

@@ -150,7 +150,6 @@ TEMPLATES = [
         },
     },
 ]
-WSGI_APPLICATION = "django_api.wsgi.application"
 
 # Database
 # [START cloudrun_django_database_config]
