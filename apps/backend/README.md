@@ -9,9 +9,9 @@ The project template API also includes two example endpoints, to be modified:
 -  `/api/pokemons/`:
     - method: `POST`
     - Create a pokemon in the DB.
-- `/api/pokemons/<name>/`:
+- `/api/pokemons/<id>/`:
     - method: `GET`
-    - Get a pokemon from the DB by its name.
+    - Get a pokemon from the DB by its id.
 
 ## Dependencies
 
