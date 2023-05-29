@@ -14,23 +14,23 @@ api = NinjaAPI(
 
 
 @api.post("/pokemons/", tags=["pokemons"], summary="Post a new pokemon")
-def post_pokemon(request, name: str) -> dict:
+async def post_pokemon(request, name: str) -> dict:
     """Create a new Pokemon, save it to the database, and return it as a dict."""
     ip: Optional[str] = get_client_ip(request)
-    pokemon = Pokemon.objects.create(name=name, ip=ip)
+    pokemon = await Pokemon.objects.acreate(name=name, ip=ip)
     return {
         "name": pokemon.name,
         "createdAt": pokemon.created_at,
+        "createdBy": pokemon.ip,
         "updatedAt": pokemon.updated_at,
-        "creatorsIp": pokemon.ip,
     }
 
 
 @api.get("/pokemons/{name}", tags=["pokemons"], summary="Get a pokemon by its name")
-def get_pokemon(request, name: str) -> dict:
+async def get_pokemon(request, name: str) -> dict:
     """Get a Pokemon from the database and return it as a dict."""
     try:
-        pokemon = Pokemon.objects.get(name=name)
+        pokemon = await Pokemon.objects.aget(name=name)
     except Pokemon.DoesNotExist:
         return {"error": "Pokemon not found"}
     except Exception as e:
