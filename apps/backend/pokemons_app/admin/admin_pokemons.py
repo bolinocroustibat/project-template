@@ -11,6 +11,7 @@ class PokemonAdmin(admin.ModelAdmin):
         "ip",
     )
     list_display = (
+        "id",
         "name",
         "created_at",
         "updated_at",

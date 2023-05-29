@@ -19,6 +19,7 @@ async def post_pokemon(request, name: str) -> dict:
     ip: Optional[str] = get_client_ip(request)
     pokemon = await Pokemon.objects.acreate(name=name, ip=ip)
     return {
+        "id": pokemon.pk,
         "name": pokemon.name,
         "createdAt": pokemon.created_at,
         "createdBy": pokemon.ip,
@@ -26,18 +27,19 @@ async def post_pokemon(request, name: str) -> dict:
     }
 
 
-@api.get("/pokemons/{name}", tags=["pokemons"], summary="Get a pokemon by its name")
-async def get_pokemon(request, name: str) -> dict:
+@api.get("/pokemons/{id}", tags=["pokemons"], summary="Get a pokemon by its ID")
+async def get_pokemon(request, id: int) -> dict:
     """Get a Pokemon from the database and return it as a dict."""
     try:
-        pokemon = await Pokemon.objects.aget(name=name)
+        pokemon = await Pokemon.objects.aget(id=id)
     except Pokemon.DoesNotExist:
         return {"error": "Pokemon not found"}
     except Exception as e:
         return {"error": str(e)}
     return {
+        "id": pokemon.pk,
         "name": pokemon.name,
         "createdAt": pokemon.created_at,
+        "createdBy": pokemon.ip,
         "updatedAt": pokemon.updated_at,
-        "creatorsIp": pokemon.ip,
     }
